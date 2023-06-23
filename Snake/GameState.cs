@@ -15,7 +15,8 @@ namespace Snake
         public Direction Direction { get; private set; }
         public int Score { get; private set; }
         public bool GameOver { get; private set; }
-
+        
+        private readonly LinkedList<Direction> dirChanges = new LinkedList<Direction>();
         private readonly LinkedList<Position> snakePositions = new LinkedList<Position>();
         public  readonly Random random = new Random();
 
@@ -60,8 +61,10 @@ namespace Snake
         {
             List<Position> empty = new List<Position>(EmptyPositions());
 
-            if (empty.Count > 0)
+            if (empty.Count == 0)
+            {
                 return;
+            }
 
             Position position = empty[random.Next(empty.Count)];
             Grid[position.Row, position.Column] = GridValue.Food;
@@ -95,9 +98,30 @@ namespace Snake
             snakePositions.RemoveLast();
         }
 
+        private Direction GetLastDirection()
+        {
+            return dirChanges.Count == 0 ? Direction : dirChanges.Last.Value;
+        }
+
+        private bool canChangeDirection(Direction newDir)
+        {
+            if(dirChanges.Count == 2)
+            {
+                return false;
+            }
+
+            Direction lastDirection = GetLastDirection();
+
+            return newDir != lastDirection && newDir != lastDirection.Opposite();
+        }
+
         public void ChangeDirection(Direction direction)
         {
-            Direction = direction;
+            // Check if can change direction
+            if (canChangeDirection(direction))
+            {
+                dirChanges.AddLast(direction);
+            }
         }
 
         private bool IsOutsideGrid(Position position)
@@ -122,6 +146,13 @@ namespace Snake
 
         public void Move()
         {
+
+            if(dirChanges.Count > 0)
+            {
+                Direction = dirChanges.First.Value;
+                dirChanges.RemoveFirst();
+            }
+
             Position newHeadPosition = HeadPosition().Translate(Direction);
             GridValue hit = WillHit(newHeadPosition);
 

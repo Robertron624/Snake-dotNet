@@ -20,6 +20,15 @@ namespace Snake
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        private readonly Dictionary<Direction, int> dirToRotation = new()
+        {
+            { Direction.Up, 0 },
+            { Direction.Down, 180 },
+            { Direction.Left, 270 },
+            { Direction.Right, 90 },
+        };
+
         private readonly int rows = 15, columns = 15;
         private readonly Image[,] gridImages;
         private GameState gameState;
@@ -42,8 +51,11 @@ namespace Snake
         private async Task RunGame()
         {
             Draw();
+            await ShowCountDown();
             Overlay.Visibility = Visibility.Hidden;
             await GameLoop();
+            await ShowGameOver();
+            gameState = new GameState(rows, columns);
         }
          
 
@@ -70,6 +82,7 @@ namespace Snake
                     Image image = new Image
                     {
                         Source = Images.Empty,
+                        RenderTransformOrigin = new Point(0.5, 0.5),
                     };
 
                     gridImages[r, c] = image;
@@ -83,6 +96,7 @@ namespace Snake
         private void Draw()
         {
             DrawGrid();
+            DrawSnakeHead();
             ScoreText.Text = $"Score: {gameState.Score}";
         }
 
@@ -135,8 +149,35 @@ namespace Snake
                 {
                     GridValue gridValue = gameState.Grid[r, c];
                     gridImages[ r, c].Source = gridValToImage[gridValue];
+                    gridImages[r, c].RenderTransform = Transform.Identity;
                 }
             }
+        }
+
+        private void DrawSnakeHead()
+        {
+            Position headPosition = gameState.HeadPosition();
+            Image image = gridImages[headPosition.Row, headPosition.Column];
+            image.Source = Images.SnakeHead;
+
+            int rotation = dirToRotation[gameState.Direction];
+            image.RenderTransform = new RotateTransform(rotation);
+        }
+
+        private async Task ShowCountDown ()
+        {
+            for(int i = 3; i > 0; i--)
+            {
+                OverlayText.Text = i.ToString();
+                await Task.Delay(500);
+            }
+        }
+
+        private async Task ShowGameOver()
+        {
+            await Task.Delay(1000);
+            Overlay.Visibility = Visibility.Visible;
+            OverlayText.Text = "Press Any Key To Start";
         }
     }
 }

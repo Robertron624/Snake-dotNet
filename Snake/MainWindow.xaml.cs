@@ -75,6 +75,8 @@ namespace Snake
             GameGrid.Rows = rows;
             GameGrid.Columns = columns;
 
+            GameGrid.Width = GameGrid.Height * (columns / (double)rows); // resize when columns and rows are not the same value
+
             for(int r = 0; r < rows; r++)
             {
                 for (int c = 0; c < columns; c++)

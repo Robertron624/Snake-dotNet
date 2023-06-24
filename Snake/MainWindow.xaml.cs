@@ -164,6 +164,21 @@ namespace Snake
             image.RenderTransform = new RotateTransform(rotation);
         }
 
+        private async Task DrawDeadSnake()
+        {
+            List<Position> positions = new List<Position>(gameState.SnakePosition());
+
+            for(int r = 0; r < positions.Count; r++)
+            {
+                Position position = positions[r];
+
+                ImageSource source = (r == 0) ? Images.DeadHead : Images.DeadBody;
+
+                gridImages[position.Row, position.Column].Source = source;
+                await Task.Delay(50);
+            }
+        }
+
         private async Task ShowCountDown ()
         {
             for(int i = 3; i > 0; i--)
@@ -175,6 +190,7 @@ namespace Snake
 
         private async Task ShowGameOver()
         {
+            DrawDeadSnake();
             await Task.Delay(1000);
             Overlay.Visibility = Visibility.Visible;
             OverlayText.Text = "Press Any Key To Start";

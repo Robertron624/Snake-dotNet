@@ -17,7 +17,7 @@ namespace Snake
         public bool GameOver { get; private set; }
         
         private readonly LinkedList<Direction> dirChanges = new LinkedList<Direction>();
-        private readonly LinkedList<Position> snakePositions = new LinkedList<Position>();
+        public readonly LinkedList<Position> snakePositions = new LinkedList<Position>();
         public  readonly Random random = new Random();
 
         public GameState(int rows, int columns) { 
